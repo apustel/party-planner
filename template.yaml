@@ -15,7 +15,7 @@ Parameters:
   ExistingBucketName:
     Type: String
     Description: ARN des bestehenden S3-Buckets
-    Default: "party-planner-bucket"
+    Default: "party-planner-training"
 
 Resources:
   RegistrationApi:
