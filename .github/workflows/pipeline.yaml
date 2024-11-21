@@ -210,13 +210,46 @@ jobs:
             --role-arn ${TESTING_CLOUDFORMATION_EXECUTION_ROLE}
 
   integration-test:
+  #  if: github.ref == 'refs/heads/main'
+  #  needs: [deploy-testing]
+  #  runs-on: ubuntu-latest
+  #  steps:
+  #    - uses: actions/checkout@v3
+  #    - run: |
+  #        # trigger the integration tests here
+
     if: github.ref == 'refs/heads/main'
     needs: [deploy-testing]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - run: |
-          # trigger the integration tests here
+      - uses: aws-actions/setup-sam@v2
+        with:
+          use-installer: true
+      - name: Assume the testing pipeline user role
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ env.TESTING_REGION }}
+          role-to-assume: ${{ env.TESTING_PIPELINE_EXECUTION_ROLE }}
+          role-session-name: testing-integration
+          role-duration-seconds: 3600
+          role-skip-session-tagging: true
+
+      # CloudFormation Output abrufen
+      - name: Get API URL from CloudFormation
+        id: get-api-url
+        run: |
+          API_URL=$(aws cloudformation describe-stacks \
+            --stack-name ${TESTING_STACK_NAME} \
+            --query "Stacks[0].Outputs[?OutputKey=='RegisterApi'].OutputValue" \
+            --output text)
+          echo "API_URL=$API_URL" >> $GITHUB_ENV
+
+      # Integrationstest ausführen
+      - name: Run Integration Test
+        run: |
+          echo "Running integration test against API: $API_URL"
+          curl -X POST -d @events/event.json.cloud -H "Content-Type: application/json" "$API_URL"
 
   deploy-prod:
     if: github.ref == 'refs/heads/main'
