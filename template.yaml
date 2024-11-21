@@ -159,8 +159,6 @@ Resources:
 Outputs:
   RegisterApi:
     Value: !Sub "https://${RegistrationApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/register/"
-    Export:
-      Name: MyRegisterApi
   RegisterFunction:
     Value: !GetAtt RegistrationFunction.Arn
   ReportingFunction:
