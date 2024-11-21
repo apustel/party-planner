@@ -1,0 +1,9 @@
+{
+    "ignore_checks": [
+        "W3011"  
+    ],
+    "regions": ["eu-central-1"],
+    "mandatory_checks": [
+        "E3001"
+   ]
+}

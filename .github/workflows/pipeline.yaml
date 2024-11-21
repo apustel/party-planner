@@ -34,13 +34,32 @@ permissions:
   id-token: write
   contents: read
 jobs:
+#  test:
+#    if: github.event_name == 'push'
+#    runs-on: ubuntu-latest
+#    steps:
+#      - uses: actions/checkout@v3
+#      - run: |
+#          # trigger the tests here
+
   test:
     if: github.event_name == 'push'
     runs-on: ubuntu-latest
     steps:
+      # Check out den Code des Repositories
       - uses: actions/checkout@v3
-      - run: |
-          # trigger the tests here
+      
+      # Installiere AWS SAM CLI
+      - name: Install AWS SAM CLI
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y python3-pip
+          pip install aws-sam-cli
+      
+      # Führe den Lint-Test aus
+      - name: Validate CloudFormation Template with SAM CLI
+        run: |
+          sam validate --lint
 
   delete-feature:
     if: startsWith(github.event.ref, 'feature') && github.event_name == 'delete'
